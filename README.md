@@ -10,6 +10,6 @@ allprojects {
 
 ```
 dependencies {
-	compile 'com.github.zhufui:ZPermissions:1.0.0'
+	compile 'com.github.zhufui:ZPermissions:1.0.1'
 }
 ```
