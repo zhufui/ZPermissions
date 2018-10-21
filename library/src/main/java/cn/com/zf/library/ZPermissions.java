@@ -7,6 +7,8 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import java.lang.ref.WeakReference;
+
 /**
  * author  : zhufu
  * email   : zhufui@sina.com
@@ -16,6 +18,9 @@ import android.support.v4.content.ContextCompat;
  */
 
 public class ZPermissions {
+
+    public static WeakReference<PermissionCallback> wPermissionCallback;
+
     /**
      * 请求权限
      *
@@ -25,7 +30,11 @@ public class ZPermissions {
      * @param permissions
      */
     public static void requestPermissions(Activity activity, int requestCode, PermissionCallback pc, String[] permissions) {
+        wPermissionCallback = new WeakReference<>(pc);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            if (wPermissionCallback.get() != null) {
+                wPermissionCallback.get().permissionGrant(requestCode);
+            }
             return;
         }
 
@@ -38,7 +47,9 @@ public class ZPermissions {
         }
 
         if (checkResult) {
-            pc.permissionGrant(requestCode);
+            if (wPermissionCallback.get() != null) {
+                wPermissionCallback.get().permissionGrant(requestCode);
+            }
         } else {
             ActivityCompat.requestPermissions(activity, permissions, requestCode);
         }
@@ -81,29 +92,31 @@ public class ZPermissions {
      *
      * @param requestCode
      * @param grantResults
-     * @param pc
      * @param requestCodes
      */
-    public static void onRequestPermissionsResult(int requestCode, int[] grantResults,
-                                                  PermissionCallback pc, int... requestCodes) {
-        for (int i = 0; i < requestCodes.length; i++) {
+    public static void onRequestPermissionsResult(int requestCode, int[] grantResults, int... requestCodes) {
+        for (int i = 0, size = requestCodes.length; i < size; i++) {
             if (requestCodes[i] != requestCode) {
                 return;
             }
         }
 
         boolean grantResult = true;
-        for (int i = 0; i < grantResults.length; i++) {
+        for (int i = 0, size = grantResults.length; i < size; i++) {
             if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
                 grantResult = false;
             }
         }
 
         if (grantResult) {
-            pc.permissionGrant(requestCode);
+            if (wPermissionCallback.get() != null) {
+                wPermissionCallback.get().permissionGrant(requestCode);
+            }
             return;
         }
 
-        pc.permissionDenied(requestCode);
+        if (wPermissionCallback.get() != null) {
+            wPermissionCallback.get().permissionDenied(requestCode);
+        }
     }
 }

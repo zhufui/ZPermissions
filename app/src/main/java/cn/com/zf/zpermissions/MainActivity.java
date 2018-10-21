@@ -1,6 +1,7 @@
 package cn.com.zf.zpermissions;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -12,12 +13,12 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import cn.com.zf.library.PermissionCallback;
+import cn.com.zf.library.PermissionGroup;
 import cn.com.zf.library.ZPermissions;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, PermissionCallback {
 
-    String[] permissions = {Manifest.permission.CALL_PHONE, Manifest.permission.READ_SMS};
-    public static final int REQUESTCODE = 1;
+    String[] permissions = {Manifest.permission.CALL_PHONE, Manifest.permission.SEND_SMS};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +30,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        ZPermissions.requestPermissions(MainActivity.this, REQUESTCODE, MainActivity.this, permissions);
+        ZPermissions.requestPermissions(MainActivity.this,
+                PermissionReqCode.CODE0, MainActivity.this, PermissionGroup.build(
+                        PermissionGroup.SENSORS()
+                ));
     }
 
     @Override
@@ -44,10 +48,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        ZPermissions.onRequestPermissionsResult(requestCode, grantResults, this, REQUESTCODE);
+        ZPermissions.onRequestPermissionsResult(requestCode, grantResults, PermissionReqCode.CODE0);
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    @SuppressLint("MissingPermission")
     public void callPhone() {
         Intent intent = new Intent(Intent.ACTION_CALL);
         Uri data = Uri.parse("tel:" + "10086");
