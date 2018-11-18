@@ -9,4 +9,5 @@ package cn.com.zf.zpermissions;
  */
 public class PermissionReqCode {
     public static final int CODE0 = 0;
+    public static final int CODE1 = 1;
 }
