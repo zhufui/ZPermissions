@@ -1,10 +1,12 @@
 package cn.com.zf.zpermissions;
 
-import android.annotation.SuppressLint;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
 import android.widget.Toast;
@@ -54,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements PermissionCallbac
 
     @Override
     public void permissionDenied(int requestCode) {
-        Toast.makeText(this, "请去设置->应用->" + getString(R.string.app_name) + "->权限,打开权限", Toast.LENGTH_SHORT).show();
+        createDialog();
     }
 
     @Override
@@ -63,11 +65,32 @@ public class MainActivity extends AppCompatActivity implements PermissionCallbac
         ZPermissions.onRequestPermissionsResult(requestCode, grantResults);
     }
 
-    @SuppressLint("MissingPermission")
-    public void callPhone() {
-//        Intent intent = new Intent(Intent.ACTION_CALL);
-//        Uri data = Uri.parse("tel:" + "10086");
-//        intent.setData(data);
-//        startActivity(intent);
+    private void createDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("提示");
+        builder.setMessage("为了保证应用的正常使用，需要您在设置中点击【权限】并打开以下权限：存储、位置、相机、电话、通讯录");
+        builder.setPositiveButton("确认", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                gotoSettings();
+                dialog.dismiss();
+                finish();
+            }
+        });
+        builder.setCancelable(false);
+//        builder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+//            @Override
+//            public void onClick(DialogInterface dialog, int which) {
+//                dialog.dismiss();
+//            }
+//        });
+        builder.create().show();
+    }
+
+    private void gotoSettings() {
+        Uri packageURI = Uri.fromParts("package", MainActivity.this.getPackageName(), null);
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageURI);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }
